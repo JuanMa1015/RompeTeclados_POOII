@@ -16,3 +16,6 @@ class Usuario:
         #Mayor que 60 años, no incluye el 60. DESCUENTO 30%
         else:
             return total * 0.3
+
+    def mostrar_informacion(self):
+        return print(f"{self.nombre} su edad es : {self.edad}")

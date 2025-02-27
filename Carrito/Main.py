@@ -1,6 +1,7 @@
 from Carrito import Carrito
 from Usuario import Usuario
-
+from Cliente import Cliente
+from Admin import Administrador
 def mostrar_productos(productos):
     print("\nProductos disponibles:")
     for producto in productos:
@@ -21,6 +22,16 @@ def main():
 
     nombre = input("Ingrese su nombre: ")
     edad = int(input("Ingrese su edad: "))
+    tipo_usuario = input("Ingrese su rol")
+
+    if tipo_usuario == "Administrador":
+        cliente = None
+        admin = Administrador(nombre, edad)
+    else:
+        admin = None
+        cliente = Cliente(nombre, edad)
+
+
     usuario = Usuario(nombre, edad)
 
     while True:
@@ -31,6 +42,7 @@ def main():
         print("4. Ver carrito")
         print("5. Finalizar compra")
         print("6. Salir")
+        print("7. Mostrar información usuario")
 
         opcion = input("Seleccione una opción: ")
 
@@ -71,6 +83,15 @@ def main():
         elif opcion == "6":
             print("Gracias por visitarnos. ¡Hasta luego!")
             break
+        elif opcion == "7":
+
+            if cliente:
+                cliente.mostrar_informacion()
+
+            if admin:
+                admin.mostrar_informacion()
+
+          
         else:
             print("Opción no válida. Intente nuevamente.")
 
