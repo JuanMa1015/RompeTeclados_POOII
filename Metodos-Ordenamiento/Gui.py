@@ -46,15 +46,17 @@ class SortingApp:
         self.load_data()
 
     def get_numeric_keys(self):
-        # Obtener claves numéricas de los datos
+        # Solo incluir las claves deseadas
+        desired_keys = ["numerodesmovilizados", "anhodesmovilizacion"]
         numeric_keys = []
-        for key in self.data[0].keys():
-            try:
-                # Intentar convertir el valor a float para ver si es numérico
-                float(self.data[0][key])
-                numeric_keys.append(key)
-            except (ValueError, TypeError):
-                continue
+        for key in desired_keys:
+            if key in self.data[0]:
+                try:
+                    # Intentar convertir el valor a float para ver si es numérico
+                    float(self.data[0][key])
+                    numeric_keys.append(key)
+                except (ValueError, TypeError):
+                    continue
         return numeric_keys
 
     def create_widgets(self):
@@ -78,15 +80,20 @@ class SortingApp:
         table_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
         # Crear el Treeview con columnas dinámicas
-        self.tree = ttk.Treeview(table_frame, columns=tuple(f"#{i+1}" for i in range(len(self.data[0].keys()))), show="headings")
+        self.tree = ttk.Treeview(table_frame, columns=tuple(f"#{i+1}" for i in range(len(self.get_desired_columns()))), show="headings")
         
         # Asignar nombres de columnas como encabezados
         column_names = self.get_pretty_column_names()
-        for i, col in enumerate(self.data[0].keys()):
+        desired_columns = self.get_desired_columns()
+        for i, col in enumerate(desired_columns):
             self.tree.heading(f"#{i+1}", text=column_names.get(col, col))
             self.tree.column(f"#{i+1}", width=150, anchor=tk.CENTER)
         
         self.tree.pack(fill=tk.BOTH, expand=True)
+
+    def get_desired_columns(self):
+        # Columnas que se mostrarán en la tabla
+        return ["departamento", "departamento_de_residencia_dane", "anhodesmovilizacion", "numerodesmovilizados"]
 
     def get_pretty_column_names(self):
         # Diccionario para mapear nombres de columnas a nombres más bonitos
@@ -115,8 +122,11 @@ class SortingApp:
 
     def load_data(self):
         # Insertar datos en la tabla
+        desired_columns = self.get_desired_columns()
         for item in self.data:
-            self.tree.insert("", tk.END, values=list(item.values()))
+            # Filtrar solo las columnas deseadas
+            filtered_item = {col: item[col] for col in desired_columns if col in item}
+            self.tree.insert("", tk.END, values=list(filtered_item.values()))
 
     def sort_data(self):
         sort_type = self.sort_type.get()
@@ -168,8 +178,11 @@ class SortingApp:
             self.tree.delete(row)
 
         # Insertar los datos ordenados
+        desired_columns = self.get_desired_columns()
         for item in sorted_data:
-            self.tree.insert("", tk.END, values=list(item.values()))
+            # Filtrar solo las columnas deseadas
+            filtered_item = {col: item[col] for col in desired_columns if col in item}
+            self.tree.insert("", tk.END, values=list(filtered_item.values()))
 
 
 if __name__ == "__main__":
