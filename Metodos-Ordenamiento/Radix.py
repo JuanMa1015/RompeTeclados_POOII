@@ -1,3 +1,4 @@
+#.
 def radix_sort(arr, key, ascending=True):
     # Filtrar y convertir los valores a números
     filtered_data = []
@@ -18,12 +19,17 @@ def radix_sort(arr, key, ascending=True):
     # Ordenar por cada dígito
     exp = 1
     while max_val // exp > 0:
-        counting_sort_by_digit(filtered_data, key, exp, ascending)
+        counting_sort_by_digit(filtered_data, key, exp)
         exp *= 10
+
+    # Invertir el orden si es descendente
+    if not ascending:
+        filtered_data.reverse()
 
     return filtered_data
 
-def counting_sort_by_digit(arr, key, exp, ascending):
+
+def counting_sort_by_digit(arr, key, exp):
     n = len(arr)
     output = [0] * n
     count = [0] * 10
@@ -48,7 +54,3 @@ def counting_sort_by_digit(arr, key, exp, ascending):
     # Copiar el arreglo de salida al arreglo original
     for i in range(n):
         arr[i] = output[i]
-
-    # Invertir el orden si es descendente
-    if not ascending:
-        arr.reverse()
