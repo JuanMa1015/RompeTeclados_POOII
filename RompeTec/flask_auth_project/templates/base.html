@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Flask Auth{% endblock %}</title>
+    <!-- Corregida la ruta del CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <!-- Estilo adicional para el contenedor de partículas -->
+    <style>
+        .particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1; /* Para que quede detrás del contenido */
+        }
+    </style>
+</head>
+<body>
+    <div class="background-gradient"></div>
+    <div class="noise-overlay"></div>
+    <!-- Contenedor de partículas con dimensiones -->
+    <div id="particles-js" class="particles-js"></div>
+
+    {% if navbar %}
+    <nav class="glass-nav animate__animated animate__fadeInDown">
+        <div class="nav-brand">
+            <svg class="logo-icon" viewBox="0 0 24 24">
+                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11V11.99z"/>
+            </svg>
+            <span>Auth</span>Flow
+        </div>
+        <ul>
+            <li>
+                <a href="{{ url_for('login') }}" class="nav-link">
+                    <svg class="nav-icon" viewBox="0 0 24 24">
+                        <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+                    </svg>
+                    <span>Cerrar Sesión</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    {% endif %}
+    
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Corregida la ruta del JS -->
+    <script src="{{ url_for('static', filename='js/particles.min.js') }}"></script>
+    <script>
+        // Asegúrate de que el DOM esté completamente cargado
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configuración de partículas
+            particlesJS("particles-js", {
+                "particles": {
+                    "number": {"value": 80, "density": {"enable": true, "value_area": 800}},
+                    "color": {"value": "#ffffff"},
+                    "shape": {"type": "circle"},
+                    "opacity": {"value": 0.3, "random": true},
+                    "size": {"value": 3, "random": true},
+                    "line_linked": {"enable": true, "distance": 150, "color": "#ffffff", "opacity": 0.2, "width": 1},
+                    "move": {"enable": true, "speed": 2, "direction": "none", "random": true, "straight": false, "out_mode": "out"}
+                },
+                "interactivity": {
+                    "detect_on": "canvas",
+                    "events": {
+                        "onhover": {"enable": true, "mode": "grab"},
+                        "onclick": {"enable": true, "mode": "push"},
+                        "resize": true
+                    }
+                }
+            });
+        });
+
+        function showSection(section) {
+            document.querySelectorAll('.section').forEach(el => el.style.display = 'none');
+            document.getElementById(section).style.display = 'block';
+        }
+    </script>
+</body>
+</html>
