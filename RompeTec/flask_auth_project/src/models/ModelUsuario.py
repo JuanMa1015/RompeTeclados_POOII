@@ -95,7 +95,7 @@ class UserModel:
 
     def update_password(self, email, new_password):
         conn, cursor = self.get_connection()
-        cursor.execute("UPDATE users SET password = %s WHERE email = %s", (new_password, email))
+        cursor.execute("UPDATE users SET password = %s WHERE email = %s", (new_password, str(email)))
         conn.commit()
         cursor.close()
         conn.close()

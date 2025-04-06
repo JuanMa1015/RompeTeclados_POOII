@@ -2,6 +2,10 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+
 <div class="dashboard-container animate__animated animate__fadeIn">
     <div class="user-profile animate-in">
         <div class="avatar">
@@ -26,7 +30,6 @@
         <div class="accordion-panel">
             <div class="profile-field">
                 <strong>Nombre:</strong>
-                <!-- <span>{{ user.nombre[0]|upper }}{{ user.nombre[1]|upper }}</span> -->
                 <span>{{ user.nombre }}</span>
             </div>
             <div class="profile-field">
@@ -57,24 +60,28 @@
             </svg>
         </button>
         <div class="accordion-panel">
-            <form method="POST" action="#">
+            <form method="POST" action="{{ url_for('dashboard') }}" id="change-password-form">
+                <input type="hidden" name="action" value="change_password">
                 <div class="input-group">
                     <svg class="input-icon" viewBox="0 0 24 24">
                         <path d="M19 2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h4l3 3 3-3h4a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zm-7 3c1.727 0 3 1.272 3 3s-1.273 3-3 3c-1.726 0-3-1.272-3-3s1.274-3 3-3zm6 13H6v-.765c0-1.86 3.582-3 6-3s6 1.14 6 3V18z"/>
                     </svg>
-                    <input type="password" name="current_password" placeholder="Contraseña actual" required>
+                    <input type="password" name="current_password" id="current_password" placeholder="Contraseña actual" required>
+                    <small class="error-message" id="current_password_error"></small>
                 </div>
                 <div class="input-group">
                     <svg class="input-icon" viewBox="0 0 24 24">
                         <path d="M19 2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h4l3 3 3-3h4a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zm-7 3c1.727 0 3 1.272 3 3s-1.273 3-3 3c-1.726 0-3-1.272-3-3s1.274-3 3-3zm6 13H6v-.765c0-1.86 3.582-3 6-3s6 1.14 6 3V18z"/>
                     </svg>
-                    <input type="password" name="new_password" placeholder="Nueva contraseña" required>
+                    <input type="password" name="new_password" id="new_password" placeholder="Nueva contraseña" required>
+                    <small class="error-message" id="new_password_error"></small>
                 </div>
                 <div class="input-group">
                     <svg class="input-icon" viewBox="0 0 24 24">
                         <path d="M19 2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h4l3 3 3-3h4a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zm-7 3c1.727 0 3 1.272 3 3s-1.273 3-3 3c-1.726 0-3-1.272-3-3s1.274-3 3-3zm6 13H6v-.765c0-1.86 3.582-3 6-3s6 1.14 6 3V18z"/>
                     </svg>
-                    <input type="password" name="confirm_password" placeholder="Confirmar nueva contraseña" required>
+                    <input type="password" name="confirm_password" id="confirm_password" placeholder="Confirmar nueva contraseña" required>
+                    <small class="error-message" id="confirm_password_error"></small>
                 </div>
                 <button type="submit" class="auth-button">
                     <span>Actualizar Contraseña</span>
@@ -96,7 +103,9 @@
         </button>
         <div class="accordion-panel">
             <p class="warning-text">¿Estás seguro? Esta acción es irreversible y eliminará todos tus datos permanentemente.</p>
-            <form method="POST" action="#">
+            <form method="POST" action="{{ url_for('dashboard') }}">
+                <input type="hidden" name="action" value="delete_account">
+                <input type="password" name="confirm_password" placeholder="Confirma tu contraseña"  required>
                 <button type="submit" class="auth-button delete-btn">
                     <span>Confirmar Eliminación</span>
                     <svg class="button-icon" viewBox="0 0 24 24">
@@ -114,7 +123,6 @@
         btn.addEventListener("click", () => {
             const panel = btn.nextElementSibling;
             btn.classList.toggle("active");
-            
             if (panel.style.maxHeight) {
                 panel.style.maxHeight = null;
                 panel.style.padding = "0 1.2rem";
@@ -123,6 +131,36 @@
                 panel.style.padding = "1.5rem";
             }
         });
+    });
+
+    // Validación en vivo
+    const form = document.getElementById('change-password-form');
+    const newPassword = document.getElementById('new_password');
+    const confirmPassword = document.getElementById('confirm_password');
+
+    confirmPassword.addEventListener('input', () => {
+        const errorSpan = document.getElementById('confirm_password_error');
+        if (confirmPassword.value !== newPassword.value) {
+            errorSpan.textContent = 'Las contraseñas no coinciden';
+        } else {
+            errorSpan.textContent = '';
+        }
+    });
+
+    form.addEventListener('submit', e => {
+        const errorSpan = document.getElementById('confirm_password_error');
+        if (confirmPassword.value !== newPassword.value) {
+            e.preventDefault();
+            errorSpan.textContent = 'Las contraseñas no coinciden';
+        }
+    });
+</script>
+<script>
+    window.addEventListener("pageshow", function (event) {
+        if (event.persisted || (performance.getEntriesByType("navigation")[0].type === "back_forward")) 
+        {
+            window.location.reload(); // Forzar recarga si se vuelve desde el historial
+        }
     });
 </script>
 {% endblock %}

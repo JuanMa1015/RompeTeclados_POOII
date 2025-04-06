@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, make_response
 from flask_mail import Mail, Message
 from config import Config
 from models.ModelUsuario import UserModel
@@ -15,7 +15,7 @@ s = URLSafeTimedSerializer(app.config['SECRET_KEY'])
 
 
 #Control de sesiones por roles
-def login_required(rol=None):
+def login_required(rol='usuario'):
     def wrapper(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
@@ -28,6 +28,26 @@ def login_required(rol=None):
             return f(*args, **kwargs)
         return decorated_function
     return wrapper
+
+#Esto le dice al navegador: “no guardes esto en la caché”, 
+# #así que aunque intente volver con la flecha atrás, tendrá que
+# hacer una petición real y si ya cerraste sesión, no se la vas a permitir.
+@app.after_request
+def add_header(response):
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
+
+def nocache(view):
+    @wraps(view)
+    def no_cache(*args, **kwargs):
+        response = make_response(view(*args, **kwargs))
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+        return response
+    return no_cache
 
 @app.route('/')
 def home():
@@ -126,16 +146,19 @@ def logout():
 
 
 @app.route('/dashboard', methods=['GET', 'POST'])
+@nocache
 @login_required(rol='usuario')
 def dashboard():
     if 'user_id' not in session:
         return redirect(url_for('login'))
 
     user = user_model.get_user_by_id(session['user_id'])
-
+    
     if request.method == 'POST':
-        # Cambio de contraseña
-        if 'current_password' in request.form:
+        action = request.form.get('action')
+
+        # CAMBIO DE CONTRASEÑA
+        if action == 'change_password':
             current = request.form['current_password']
             new = request.form['new_password']
             confirm = request.form['confirm_password']
@@ -150,14 +173,54 @@ def dashboard():
                 else:
                     flash('Contraseña actual incorrecta', 'danger')
 
-        # Eliminación de cuenta
-        if 'confirm_password' in request.form and 'current_password' not in request.form:
-            user_model.delete_user(user['id'])
-            session.clear()
-            flash('Cuenta eliminada exitosamente', 'success')
-            return redirect(url_for('register'))
+        # ELIMINACIÓN DE CUENTA
+        elif action == 'delete_account':
+            confirm_pass = request.form['confirm_password']
+            if user_model.check_password(user['email'], confirm_pass):
+                user_model.delete_user(user['id'])
+                session.clear()
+                flash('Cuenta eliminada exitosamente', 'success')
+                return redirect(url_for('register'))
+            else:
+                flash('Contraseña incorrecta. No se eliminó la cuenta.', 'error')
+        response = make_response(render_template('dashboard.html', user=user, navbar=True))
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+        return response
 
-    return render_template('dashboard.html', user=user, navbar = True)
+    return render_template('dashboard.html', user=user, navbar=True)
+
+@app.route('/cambiar_contraseña', methods=['POST'])
+@login_required()
+def cambiar_contraseña():
+    user_id = session.get('user_id')
+    actual = request.form['current_password']
+    nueva = request.form['new_password']
+    confirmar = request.form['confirm_password']
+
+    user = user_model.get_user_by_id(user_id)
+    if not bcrypt.checkpw(actual.encode('utf-8'), user['password'].encode('utf-8')):
+        flash('Contraseña actual incorrecta', 'error')
+        return redirect(url_for('dashboard'))
+
+    if nueva != confirmar:
+        flash('Las contraseñas no coinciden', 'error')
+        return redirect(url_for('dashboard'))
+
+    hashed = bcrypt.hashpw(nueva.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+    user_model.update_password(user_id, hashed)
+    flash('Contraseña actualizada correctamente', 'success')
+    return redirect(url_for('dashboard'))
+
+@app.route('/eliminar_cuenta', methods=['POST'])
+@login_required()
+def eliminar_cuenta():
+    user_id = session.get('user_id')
+    user_model.delete_user(user_id)  # Asegúrate que esta función exista
+    session.clear()
+    flash('Tu cuenta ha sido eliminada correctamente', 'success')
+    return redirect(url_for('login'))
 
 
 @app.route('/forgot', methods=['GET', 'POST'])

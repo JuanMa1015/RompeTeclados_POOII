@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
     <title>{% block title %}Flask Auth{% endblock %}</title>
     <!-- Corregida la ruta del CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
@@ -42,7 +46,7 @@
         </div>
         <ul>
             <li>
-                <a href="{{ url_for('login') }}" class="nav-link">
+                <a href="{{ url_for('logout') }}" class="nav-link">
                     <svg class="nav-icon" viewBox="0 0 24 24">
                         <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
                     </svg>
@@ -110,6 +114,14 @@
             {% endif %}
         {% endwith %}
     </script>    
-
+    <script>
+        // Si el usuario usa las flechas del navegador y la página viene de caché, forzar recarga
+        window.addEventListener("pageshow", function (event) {
+            if (event.persisted || window.performance.navigation.type === 2) {
+                // Esto recarga la página desde el servidor
+                window.location.reload();
+            }
+        });
+    </script>
 </body>
 </html>
