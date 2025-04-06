@@ -30,6 +30,7 @@ class UserModel:
         self.cursor.execute("SELECT 1 FROM users WHERE username = %s", (username,))
         return self.cursor.fetchone() is not None
 
+
     def get_user_by_email(self, email):
         self.cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
         row = self.cursor.fetchone()
