@@ -100,7 +100,8 @@
             "timeOut": "2000",
             "positionClass": "toast-top-right"
         };
-
+        
+        // prettier-ignore
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}

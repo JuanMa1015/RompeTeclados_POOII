@@ -3,71 +3,102 @@ import bcrypt
 from config import Config
 
 class UserModel:
-    def __init__(self):
-        self.conn = psycopg2.connect(Config.SQLALCHEMY_DATABASE_URI)
-        self.cursor = self.conn.cursor()
+
+    def get_connection(self):
+        conn = psycopg2.connect(Config.SQLALCHEMY_DATABASE_URI)
+        return conn, conn.cursor()
 
     def create_user(self, nombre, username, email, telefono, ciudad, password, token, rol='usuario'):
+        conn, cursor = self.get_connection()
         try:
-            self.cursor.execute("""
+            cursor.execute("""
                 INSERT INTO users (nombre, username, email, telefono, ciudad, password, token, active, rol)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (nombre, username, email, telefono, ciudad, password, token, False, rol))
-            self.conn.commit()
-            
+            conn.commit()
             return True
-        
         except psycopg2.errors.UniqueViolation as e:
-            self.conn.rollback()
+            conn.rollback()
             return str(e)
+        finally:
+            cursor.close()
+            conn.close()
 
-    #Verificar si el username o el correo existe 
     def email_exists(self, email):
-        self.cursor.execute("SELECT 1 FROM users WHERE email = %s", (email,))
-        return self.cursor.fetchone() is not None
+        conn, cursor = self.get_connection()
+        cursor.execute("SELECT 1 FROM users WHERE email = %s", (email,))
+        exists = cursor.fetchone() is not None
+        cursor.close()
+        conn.close()
+        return exists
 
     def username_exists(self, username):
-        self.cursor.execute("SELECT 1 FROM users WHERE username = %s", (username,))
-        return self.cursor.fetchone() is not None
-
+        conn, cursor = self.get_connection()
+        cursor.execute("SELECT 1 FROM users WHERE username = %s", (username,))
+        exists = cursor.fetchone() is not None
+        cursor.close()
+        conn.close()
+        return exists
 
     def get_user_by_email(self, email):
-        self.cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
-        row = self.cursor.fetchone()
+        conn, cursor = self.get_connection()
+        cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
+        row = cursor.fetchone()
+        cursor.close()
+        conn.close()
         return self.row_to_dict(row)
 
     def get_user_by_id(self, user_id):
-        self.cursor.execute("SELECT * FROM users WHERE id = %s", (user_id,))
-        row = self.cursor.fetchone()
+        conn, cursor = self.get_connection()
+        cursor.execute("SELECT * FROM users WHERE id = %s", (user_id,))
+        row = cursor.fetchone()
         if row:
-            columns = [desc[0] for desc in self.cursor.description]
-            return dict(zip(columns, row))
-        return None
-    
+            columns = [desc[0] for desc in cursor.description]
+            result = dict(zip(columns, row))
+        else:
+            result = None
+        cursor.close()
+        conn.close()
+        return result
+
     def get_user_by_username(self, username):
-        self.cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
-        row = self.cursor.fetchone()
+        conn, cursor = self.get_connection()
+        cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
+        row = cursor.fetchone()
+        cursor.close()
+        conn.close()
         return self.row_to_dict(row)
 
-
     def check_password(self, email, password):
-        self.cursor.execute("SELECT password FROM users WHERE email = %s", (email,))
-        row = self.cursor.fetchone()
+        conn, cursor = self.get_connection()
+        cursor.execute("SELECT password FROM users WHERE email = %s", (email,))
+        row = cursor.fetchone()
+        cursor.close()
+        conn.close()
         if row and bcrypt.checkpw(password.encode(), row[0].encode()):
             return True
         return False
 
     def delete_user(self, user_id):
-        self.cursor.execute("DELETE FROM users WHERE id = %s", (user_id,))
-        self.conn.commit()
+        conn, cursor = self.get_connection()
+        cursor.execute("DELETE FROM users WHERE id = %s", (user_id,))
+        conn.commit()
+        cursor.close()
+        conn.close()
 
     def activate_user(self, email):
-        self.cursor.execute("UPDATE users SET active = TRUE WHERE email = %s", (email,))
-        self.conn.commit()
+        conn, cursor = self.get_connection()
+        cursor.execute("UPDATE users SET active = TRUE WHERE email = %s", (email,))
+        conn.commit()
+        cursor.close()
+        conn.close()
 
     def update_password(self, email, new_password):
-        self.cursor.execute("UPDATE users SET password = %s WHERE email = %s", (new_password, email))
-        self.conn.commit()
+        conn, cursor = self.get_connection()
+        cursor.execute("UPDATE users SET password = %s WHERE email = %s", (new_password, email))
+        conn.commit()
+        cursor.close()
+        conn.close()
 
     def row_to_dict(self, row):
         if not row:
