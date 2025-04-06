@@ -3,11 +3,67 @@
   <head>
     <meta charset="UTF-8" />
     <title>Recupera tu contraseña</title>
+    <style>
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f6f9;
+        color: #333;
+        padding: 2rem;
+      }
+
+      .email-container {
+        background-color: #ffffff;
+        border-radius: 8px;
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 2rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        text-align: center;
+      }
+
+      h2 {
+        color: #2196f3;
+      }
+
+      p {
+        font-size: 16px;
+        line-height: 1.6;
+      }
+
+      .button {
+        display: inline-block;
+        padding: 12px 24px;
+        margin-top: 20px;
+        background-color: #2196f3;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        font-weight: bold;
+      }
+
+      .button:hover {
+        background-color: #1976d2;
+      }
+
+      .footer {
+        margin-top: 2rem;
+        font-size: 0.85rem;
+        color: #999;
+      }
+    </style>
   </head>
   <body>
-    <h2>Hola {{ user }}!</h2>
-    <p>Hiciste una solicitud para recuperar tu contraseña.</p>
-    <p><a href="{{ recover_url }}">Reestablecer contraseña</a></p>
-    <p>Si no fuiste tu, ignora este correo.</p>
+    <div class="email-container">
+      <h2>¡Hola {{ user }}!</h2>
+      <p>
+        Recibimos una solicitud para recuperar tu contraseña.<br />
+        Si tú hiciste esta solicitud, haz clic en el siguiente botón para
+        restablecerla.
+      </p>
+      <a href="{{ recover_url }}" class="button">Reestablecer contraseña</a>
+      <p class="footer">
+        Si no fuiste tú, puedes ignorar este correo. Tu cuenta seguirá segura.
+      </p>
+    </div>
   </body>
 </html>

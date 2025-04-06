@@ -1,6 +1,47 @@
-{% extends "base.html" %} 
-{% block title %}Registro{% endblock %}
-{% block content %}
+{% extends "base.html" %} {% block title %}Registro{% endblock %} {% block
+content %}
+
+<style>
+  .input-group {
+    position: relative;
+    margin-bottom: 2.5rem;
+  }
+
+  .input-group input {
+    width: 100%;
+    height: 44px; /* Altura fija para evitar que se estire con el mensaje */
+    padding: 0.8rem 1rem 0.8rem 2.5rem;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+    box-sizing: border-box;
+  }
+
+  .input-group input.invalid {
+    border-color: #e57373;
+  }
+
+  .input-icon {
+    position: absolute;
+    top: 50%;
+    left: 0.8rem;
+    transform: translateY(-50%);
+    color: #aaa;
+    font-size: 1rem;
+    pointer-events: none;
+  }
+
+  .error-message {
+    font-size: 0.75rem;
+    color: #e57373;
+    margin-top: 0.3rem;
+    padding-left: 0.2rem;
+    position: absolute;
+    top: 100%;
+    left: 0;
+  }
+</style>
+
 <div class="auth-container animate__animated animate__fadeIn">
   <div class="auth-header animate-in">
     <svg class="auth-icon" viewBox="0 0 24 24">
@@ -18,58 +59,87 @@
   <form method="POST" class="auth-form" novalidate>
     <div class="input-group animate-in delay-1">
       <i class="fas fa-user input-icon"></i>
-      <input type="text" name="nombre" placeholder="Nombre Completo" required>
+      <input type="text" name="nombre" placeholder="Nombre Completo" required />
       <div class="error-message"></div>
     </div>
-  
+
     <div class="input-group animate-in delay-1">
       <i class="fas fa-user-tag input-icon"></i>
-      <input type="text" name="username" placeholder="Nombre de Usuario" required>
+      <input
+        type="text"
+        name="username"
+        placeholder="Nombre de Usuario"
+        required
+      />
       <div class="error-message"></div>
     </div>
-  
+
     <div class="input-group animate-in delay-2">
       <i class="fas fa-envelope input-icon"></i>
-      <input type="email" name="email" placeholder="Correo electrónico" required
+      <input
+        type="email"
+        name="email"
+        placeholder="Correo electrónico"
+        required
         pattern="^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
-        title="Introduce un correo válido">
+        title="Introduce un correo válido"
+      />
       <div class="error-message"></div>
     </div>
-  
+
     <div class="input-group animate-in delay-2">
       <i class="fas fa-phone input-icon"></i>
-      <input type="tel" name="telefono" placeholder="Número de Celular" required
+      <input
+        type="tel"
+        name="telefono"
+        placeholder="Número de Celular"
+        required
         pattern="^\d{10}$"
-        title="Debe contener exactamente 10 dígitos numéricos">
+        title="Debe contener exactamente 10 dígitos numéricos"
+      />
       <div class="error-message"></div>
     </div>
-  
+
     <div class="input-group animate-in delay-3">
       <i class="fas fa-city input-icon"></i>
-      <input type="text" name="ciudad" placeholder="Ciudad" required>
+      <input type="text" name="ciudad" placeholder="Ciudad" required />
       <div class="error-message"></div>
     </div>
-  
+
     <div class="input-group animate-in delay-3">
       <i class="fas fa-lock input-icon"></i>
-      <input type="password" name="password" placeholder="Contraseña" required
+      <input
+        type="password"
+        name="password"
+        placeholder="Contraseña"
+        required
         pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}"
-        title="Debe tener al menos 8 caracteres, incluyendo una mayúscula, una minúscula, un número y un carácter especial.">
+        title="Debe tener al menos 8 caracteres, incluyendo una mayúscula, una minúscula, un número y un carácter especial."
+      />
       <div class="error-message"></div>
     </div>
-  
+
     <div class="input-group animate-in delay-3">
       <i class="fas fa-lock input-icon"></i>
-      <input type="password" name="confirm_password" placeholder="Confirmar Contraseña" required>
+      <input
+        type="password"
+        name="confirm_password"
+        placeholder="Confirmar Contraseña"
+        required
+      />
       <div class="error-message"></div>
     </div>
-  
-    <button type="submit" class="auth-button animate-in delay-4">
+
+    <button
+      type="submit"
+      class="auth-button animate-in delay-4"
+      disabled
+      id="registerBtn"
+    >
       <span>Registrarse</span>
       <i class="fas fa-check-circle button-icon"></i>
     </button>
   </form>
-  
 
   <div class="auth-footer animate-in delay-4">
     <p>
@@ -84,26 +154,52 @@
     const form = document.querySelector(".auth-form");
     const telefonoInput = form.querySelector('input[name="telefono"]');
     const passwordInput = form.querySelector('input[name="password"]');
+    const emailInput = form.querySelector('input[name="email"]');
     const confirmPasswordInput = form.querySelector(
       'input[name="confirm_password"]'
     );
 
-    function showError(input, message) {
-      clearError(input);
-      const error = document.createElement("div");
-      error.className = "error-message";
-      error.innerText = message;
-      input.parentElement.appendChild(error);
+    function validateFormFields() {
+      const isEmailValid =
+        /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/.test(
+          emailInput.value
+        );
+      const isPhoneValid = /^\d{10}$/.test(telefonoInput.value);
+      const isPasswordValid =
+        /(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}/.test(
+          passwordInput.value
+        );
+      const isConfirmPasswordValid =
+        confirmPasswordInput.value === passwordInput.value;
+      const allFilled = [...form.querySelectorAll("input")].every(
+        (input) => input.value.trim() !== ""
+      );
+
+      const isValid =
+        isEmailValid &&
+        isPhoneValid &&
+        isPasswordValid &&
+        isConfirmPasswordValid &&
+        allFilled;
+
+      document.getElementById("registerBtn").disabled = !isValid;
     }
 
-    function clearError(input) {
-      const existingError = input.parentElement.querySelector(".error-message");
-      if (existingError) {
-        existingError.remove();
+    function showError(input, message) {
+      const errorDiv = input.parentElement.querySelector(".error-message");
+      if (errorDiv) {
+        errorDiv.innerText = message;
       }
     }
 
-    // Validación en vivo del teléfono
+    function clearError(input) {
+      const errorDiv = input.parentElement.querySelector(".error-message");
+      if (errorDiv) {
+        errorDiv.innerText = "";
+      }
+    }
+
+    // Validaciones en vivo
     telefonoInput.addEventListener("input", function () {
       const regex = /^\d{10}$/;
       if (!regex.test(this.value)) {
@@ -113,7 +209,6 @@
       }
     });
 
-    // Validación en vivo de la contraseña
     passwordInput.addEventListener("input", function () {
       const regex = /(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}/;
       if (!regex.test(this.value)) {
@@ -126,7 +221,6 @@
       }
     });
 
-    // Validación en vivo de confirmar contraseña
     confirmPasswordInput.addEventListener("input", function () {
       if (this.value !== passwordInput.value) {
         showError(this, "Las contraseñas no coinciden");
@@ -135,9 +229,26 @@
       }
     });
 
-    // Validación final al enviar
+    emailInput.addEventListener("input", function () {
+      const regex = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
+      if (!regex.test(this.value)) {
+        showError(this, "Introduce un correo electrónico válido");
+      } else {
+        clearError(this);
+      }
+    });
+
     form.addEventListener("submit", function (e) {
       let valid = true;
+
+      if (
+        !/^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/.test(
+          emailInput.value
+        )
+      ) {
+        showError(emailInput, "Introduce un correo electrónico válido");
+        valid = false;
+      }
 
       if (!/^\d{10}$/.test(telefonoInput.value)) {
         showError(
@@ -167,6 +278,19 @@
       if (!valid) {
         e.preventDefault();
       }
+    });
+
+    // 🔥 Aquí va el bloque que causaba error, ahora dentro del DOMContentLoaded
+    [
+      emailInput,
+      telefonoInput,
+      passwordInput,
+      confirmPasswordInput,
+      form.querySelector('input[name="nombre"]'),
+      form.querySelector('input[name="username"]'),
+      form.querySelector('input[name="ciudad"]'),
+    ].forEach((input) => {
+      input.addEventListener("input", validateFormFields);
     });
   });
 </script>
