@@ -5,10 +5,10 @@
 <div class="dashboard-container animate__animated animate__fadeIn">
     <div class="user-profile animate-in">
         <div class="avatar">
-            {{ user.nombre[0]|upper }}{{ user.apellido[0]|upper if user.apellido else user.nombre[1]|upper }}
+            {{ user.nombre[0]|upper }}{{ user.username[0]|upper if user.username else user.nombre[1]|upper }}
         </div>
         <div class="user-info">
-            <h3>{{ user.nombre }} {{ user.apellido if user.apellido else '' }}</h3>
+            <h3>{{ user.nombre }}</h3>
             <p>@{{ user.username }}</p>
         </div>
     </div>
@@ -26,7 +26,8 @@
         <div class="accordion-panel">
             <div class="profile-field">
                 <strong>Nombre:</strong>
-                <span>{{ user.nombre[0]|upper }}{{ user.nombre[1]|upper }}</span>
+                <!-- <span>{{ user.nombre[0]|upper }}{{ user.nombre[1]|upper }}</span> -->
+                <span>{{ user.nombre }}</span>
             </div>
             <div class="profile-field">
                 <strong>Usuario:</strong>

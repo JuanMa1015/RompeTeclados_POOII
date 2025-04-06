@@ -1,0 +1,174 @@
+{% extends "base.html" %} 
+{% block title %}Registro{% endblock %}
+{% block content %}
+<div class="auth-container animate__animated animate__fadeIn">
+  <div class="auth-header animate-in">
+    <svg class="auth-icon" viewBox="0 0 24 24">
+      <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+    </svg>
+    <h2>Crea tu cuenta</h2>
+    <p>Únete a nuestra comunidad</p>
+  </div>
+
+  {% with messages = get_flashed_messages(with_categories=true) %} {% if
+  messages %} {% for category, message in messages %}
+  <div class="alert alert-{{ category }}">{{ message }}</div>
+  {% endfor %} {% endif %} {% endwith %}
+
+  <form method="POST" class="auth-form" novalidate>
+    <div class="input-group animate-in delay-1">
+      <i class="fas fa-user input-icon"></i>
+      <input type="text" name="nombre" placeholder="Nombre Completo" required>
+      <div class="error-message"></div>
+    </div>
+  
+    <div class="input-group animate-in delay-1">
+      <i class="fas fa-user-tag input-icon"></i>
+      <input type="text" name="username" placeholder="Nombre de Usuario" required>
+      <div class="error-message"></div>
+    </div>
+  
+    <div class="input-group animate-in delay-2">
+      <i class="fas fa-envelope input-icon"></i>
+      <input type="email" name="email" placeholder="Correo electrónico" required
+        pattern="^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
+        title="Introduce un correo válido">
+      <div class="error-message"></div>
+    </div>
+  
+    <div class="input-group animate-in delay-2">
+      <i class="fas fa-phone input-icon"></i>
+      <input type="tel" name="telefono" placeholder="Número de Celular" required
+        pattern="^\d{10}$"
+        title="Debe contener exactamente 10 dígitos numéricos">
+      <div class="error-message"></div>
+    </div>
+  
+    <div class="input-group animate-in delay-3">
+      <i class="fas fa-city input-icon"></i>
+      <input type="text" name="ciudad" placeholder="Ciudad" required>
+      <div class="error-message"></div>
+    </div>
+  
+    <div class="input-group animate-in delay-3">
+      <i class="fas fa-lock input-icon"></i>
+      <input type="password" name="password" placeholder="Contraseña" required
+        pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}"
+        title="Debe tener al menos 8 caracteres, incluyendo una mayúscula, una minúscula, un número y un carácter especial.">
+      <div class="error-message"></div>
+    </div>
+  
+    <div class="input-group animate-in delay-3">
+      <i class="fas fa-lock input-icon"></i>
+      <input type="password" name="confirm_password" placeholder="Confirmar Contraseña" required>
+      <div class="error-message"></div>
+    </div>
+  
+    <button type="submit" class="auth-button animate-in delay-4">
+      <span>Registrarse</span>
+      <i class="fas fa-check-circle button-icon"></i>
+    </button>
+  </form>
+  
+
+  <div class="auth-footer animate-in delay-4">
+    <p>
+      ¿Ya tienes una cuenta?
+      <a href="{{ url_for('login') }}" class="auth-link">Inicia sesión</a>
+    </p>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const form = document.querySelector(".auth-form");
+    const telefonoInput = form.querySelector('input[name="telefono"]');
+    const passwordInput = form.querySelector('input[name="password"]');
+    const confirmPasswordInput = form.querySelector(
+      'input[name="confirm_password"]'
+    );
+
+    function showError(input, message) {
+      clearError(input);
+      const error = document.createElement("div");
+      error.className = "error-message";
+      error.innerText = message;
+      input.parentElement.appendChild(error);
+    }
+
+    function clearError(input) {
+      const existingError = input.parentElement.querySelector(".error-message");
+      if (existingError) {
+        existingError.remove();
+      }
+    }
+
+    // Validación en vivo del teléfono
+    telefonoInput.addEventListener("input", function () {
+      const regex = /^\d{10}$/;
+      if (!regex.test(this.value)) {
+        showError(this, "Debe contener exactamente 10 dígitos numéricos");
+      } else {
+        clearError(this);
+      }
+    });
+
+    // Validación en vivo de la contraseña
+    passwordInput.addEventListener("input", function () {
+      const regex = /(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}/;
+      if (!regex.test(this.value)) {
+        showError(
+          this,
+          "Debe tener al menos 8 caracteres, incluyendo una mayúscula, una minúscula, un número y un carácter especial."
+        );
+      } else {
+        clearError(this);
+      }
+    });
+
+    // Validación en vivo de confirmar contraseña
+    confirmPasswordInput.addEventListener("input", function () {
+      if (this.value !== passwordInput.value) {
+        showError(this, "Las contraseñas no coinciden");
+      } else {
+        clearError(this);
+      }
+    });
+
+    // Validación final al enviar
+    form.addEventListener("submit", function (e) {
+      let valid = true;
+
+      if (!/^\d{10}$/.test(telefonoInput.value)) {
+        showError(
+          telefonoInput,
+          "Debe contener exactamente 10 dígitos numéricos"
+        );
+        valid = false;
+      }
+
+      if (
+        !/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}/.test(
+          passwordInput.value
+        )
+      ) {
+        showError(
+          passwordInput,
+          "Debe tener al menos 8 caracteres, incluyendo una mayúscula, una minúscula, un número y un carácter especial."
+        );
+        valid = false;
+      }
+
+      if (confirmPasswordInput.value !== passwordInput.value) {
+        showError(confirmPasswordInput, "Las contraseñas no coinciden");
+        valid = false;
+      }
+
+      if (!valid) {
+        e.preventDefault();
+      }
+    });
+  });
+</script>
+
+{% endblock %}
